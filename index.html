@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Transcoder</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎬 Video Transcoder</h1>
+            <div class="status-bar" id="statusBar">
+                <span class="status-item">CPU: <span id="cpuUsage">0%</span></span>
+                <span class="status-item">Memory: <span id="memoryUsage">0%</span></span>
+                <span class="status-item">Jobs: <span id="totalJobs">0</span></span>
+                <span class="status-item">Processing: <span id="processingJobs">0</span></span>
+            </div>
+        </header>
+
+        <main>
+            <!-- Settings Section -->
+            <section class="card">
+                <h2>⚙️ Settings</h2>
+                <form id="settingsForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="sourceFolder">Source Folder</label>
+                            <input type="text" id="sourceFolder" placeholder="/path/to/source/videos" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="outputFolder">Output Folder</label>
+                            <input type="text" id="outputFolder" placeholder="/path/to/output/videos" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="outputFormat">Output Format</label>
+                            <select id="outputFormat">
+                                <option value="mp4">MP4</option>
+                                <option value="mkv">MKV</option>
+                                <option value="webm">WebM</option>
+                                <option value="avi">AVI</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="videoCodec">Video Codec</label>
+                            <select id="videoCodec">
+                                <option value="libx264">H.264 (libx264)</option>
+                                <option value="libx265">H.265 (libx265)</option>
+                                <option value="libvpx-vp9">VP9</option>
+                                <option value="copy">Copy (no re-encode)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="audioCodec">Audio Codec</label>
+                            <select id="audioCodec">
+                                <option value="aac">AAC</option>
+                                <option value="libmp3lame">MP3</option>
+                                <option value="libopus">Opus</option>
+                                <option value="copy">Copy (no re-encode)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="preset">Encoding Preset</label>
+                            <select id="preset">
+                                <option value="ultrafast">Ultra Fast</option>
+                                <option value="superfast">Super Fast</option>
+                                <option value="veryfast">Very Fast</option>
+                                <option value="faster">Faster</option>
+                                <option value="fast">Fast</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="slow">Slow</option>
+                                <option value="slower">Slower</option>
+                                <option value="veryslow">Very Slow</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="crf">Quality (CRF: 0-51, lower=better)</label>
+                            <input type="range" id="crf" min="0" max="51" value="23">
+                            <span id="crfValue">23</span>
+                        </div>
+                        <div class="form-group checkbox-group">
+                            <label>
+                                <input type="checkbox" id="watchEnabled">
+                                Auto-watch source folder for new files
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">Save Settings</button>
+                        <button type="button" class="btn btn-secondary" id="scanBtn">Scan for New Videos</button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Jobs Section -->
+            <section class="card">
+                <div class="section-header">
+                    <h2>📋 Transcode Jobs</h2>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="pending">Pending</button>
+                        <button class="filter-btn" data-filter="processing">Processing</button>
+                        <button class="filter-btn" data-filter="completed">Completed</button>
+                        <button class="filter-btn" data-filter="failed">Failed</button>
+                    </div>
+                </div>
+                <div id="jobsList" class="jobs-list">
+                    <p class="empty-state">No jobs yet. Configure settings and scan for videos to get started.</p>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>Video Transcoder v1.0 | Built with Flask & FFmpeg</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
