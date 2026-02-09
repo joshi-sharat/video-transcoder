@@ -1,0 +1,15 @@
+[Unit]
+Description=Video Transcoder Web Application
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/video-transcoder
+Environment="PATH=/opt/video-transcoder/venv/bin"
+ExecStart=/opt/video-transcoder/venv/bin/gunicorn --bind 0.0.0.0:5000 --workers 4 --timeout 300 app:app
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

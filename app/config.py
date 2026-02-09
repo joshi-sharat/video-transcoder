@@ -22,6 +22,13 @@ class Config:
     FFMPEG_PATH = os.getenv('FFMPEG_PATH', 'ffmpeg')
     FFPROBE_PATH = os.getenv('FFPROBE_PATH', 'ffprobe')
 
+    # RAG Service settings
+    RAG_URL = os.getenv('RAG_URL', 'localhost')
+    RAG_PORT = os.getenv('RAG_PORT', '8080')
+    RAG_ENDPOINT = os.getenv('RAG_ENDPOINT', '/query')
+    RAG_DEFAULT_TOP_K = int(os.getenv('RAG_DEFAULT_TOP_K', '3'))
+    RAG_DEFAULT_TEMPERATURE = float(os.getenv('RAG_DEFAULT_TEMPERATURE', '0.1'))
+
     # Supported video formats
     SUPPORTED_VIDEO_FORMATS = ['.mp4', '.avi', '.mkv', '.mov', '.flv', '.wmv', '.m4v', '.webm', '.mpg', '.mpeg']
 

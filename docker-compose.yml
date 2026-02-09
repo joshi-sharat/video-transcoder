@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      # Mount your local video directories here
+      - ./videos/source:/app/videos/source
+      - ./videos/output:/app/videos/output
+      # Persist database
+      - ./instance:/app/instance
+    environment:
+      - FLASK_APP=app.py
+      - SECRET_KEY=change-this-to-a-random-secret-key
+      - DEBUG=False
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  instance:

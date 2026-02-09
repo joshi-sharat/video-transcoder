@@ -13,6 +13,7 @@ A powerful web-based video transcoding application with automatic folder monitor
 - **Real-time Progress**: Live progress tracking for all transcoding jobs
 - **Job Management**: View, filter, and manage all transcoding jobs
 - **System Monitoring**: CPU and memory usage tracking
+- **🤖 RAG Integration**: Query external RAG (Retrieval Augmented Generation) services
 - **Docker Support**: Easy deployment with Docker and Docker Compose
 
 ## 📋 Requirements
@@ -23,7 +24,7 @@ A powerful web-based video transcoding application with automatic folder monitor
 
 ## 🚀 Quick Start
 
-### Option 1: Standard Installation
+### Option 1: Linux/Mac Installation
 
 1. **Clone or download the repository**
 
@@ -38,36 +39,77 @@ sudo dnf install ffmpeg python3-pip
 
 # Arch Linux
 sudo pacman -S ffmpeg python-pip
+
+# macOS (using Homebrew)
+brew install ffmpeg python
 ```
 
-3. **Create and activate virtual environment**:
+3. **Run the startup script**:
 ```bash
+chmod +x start.sh
+./start.sh
+```
+
+4. **Access the web interface**:
+Open your browser and navigate to `http://localhost:5000`
+
+### Option 1B: Windows Installation
+
+**Quick Install (Recommended):**
+
+1. **Double-click `install.bat`** - This will:
+   - Check Python installation
+   - Create virtual environment
+   - Install all dependencies
+   - Check for FFmpeg
+   - Create desktop shortcut
+
+2. **Run the application:**
+   - Double-click `start.bat`
+   - Or in Command Prompt: `start.bat`
+
+3. **Access the web interface:**
+   - Open browser: `http://localhost:5000`
+
+**See [WINDOWS_SETUP.md](WINDOWS_SETUP.md) for detailed Windows instructions.**
+
+### Manual Installation (All Platforms)
+
+1. **Create and activate virtual environment**:
+```bash
+# Linux/Mac
 python3 -m venv venv
 source venv/bin/activate
+
+# Windows (Command Prompt)
+python -m venv venv
+venv\Scripts\activate.bat
+
+# Windows (PowerShell)
+python -m venv venv
+venv\Scripts\Activate.ps1
 ```
 
-4. **Install Python dependencies**:
+2. **Install Python dependencies**:
 ```bash
 pip install -r requirements.txt
 ```
 
-5. **Configure environment** (optional):
+3. **Create necessary directories**:
 ```bash
-cp .env.example .env
-# Edit .env with your preferred settings
-```
-
-6. **Create necessary directories**:
-```bash
+# Linux/Mac
 mkdir -p videos/source videos/output
+
+# Windows
+mkdir videos\source videos\output
 ```
 
-7. **Run the application**:
+4. **Run the application**:
 ```bash
 python app.py
 ```
 
-8. **Access the web interface**:
+5. **Access the web interface**:
 Open your browser and navigate to `http://localhost:5000`
 
 ### Option 2: Docker Installation
@@ -124,6 +166,42 @@ docker-compose down
 4. **Manage Jobs**:
    - Delete completed or failed jobs
    - View error messages for failed jobs
+
+### 🤖 RAG Integration
+
+Query external RAG (Retrieval Augmented Generation) services directly from the interface.
+
+**Quick Start:**
+
+1. **Configure RAG Service** (in `.env`):
+   ```env
+   RAG_URL=localhost
+   RAG_PORT=8000
+   RAG_ENDPOINT=/api/query
+   ```
+
+2. **Start Mock RAG Service** (for testing):
+   ```bash
+   python mock_rag_service.py
+   ```
+
+3. **Access RAG Interface**:
+   - Click "🤖 RAG Query" in the header
+   - Or navigate to: http://localhost:5000/rag
+
+4. **Submit Queries**:
+   - Enter your query
+   - Adjust parameters (top_k, temperature)
+   - Get instant responses
+
+**API Usage:**
+```bash
+curl -X POST http://localhost:5000/api/rag/query \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Generate Yoga Class", "top_k": 3, "use_rag": true, "temperature": 0.1}'
+```
+
+See [RAG_INTEGRATION.md](RAG_INTEGRATION.md) for complete documentation.
 
 ### API Endpoints
 

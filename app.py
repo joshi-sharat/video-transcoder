@@ -2,6 +2,7 @@ import os
 import json
 import threading
 import time
+import requests
 from datetime import datetime
 from pathlib import Path
 from flask import Flask, request, jsonify, render_template, send_from_directory
@@ -240,6 +241,84 @@ def get_status():
         'watch_enabled': Settings.get_value('watch_enabled', 'false') == 'true'
     })
 
+# RAG Routes
+@app.route('/rag')
+def rag_page():
+    """Render RAG query interface"""
+    return render_template('rag.html')
+
+@app.route('/api/rag/query', methods=['POST'])
+def rag_query():
+    """Query the RAG service"""
+    data = request.json
+
+    print("************************************\n Got data " + data.get("query"))
+
+    # Validate request
+    if not data or 'query' not in data:
+        return jsonify({'error': 'Query is required'}), 400
+    
+    query = data.get('query')
+    top_k = data.get('top_k', app.config['RAG_DEFAULT_TOP_K'])
+    use_rag = data.get('use_rag', True)
+    temperature = data.get('temperature', app.config['RAG_DEFAULT_TEMPERATURE'])
+    
+    # Build RAG service URL
+    rag_url = f"http://{app.config['RAG_URL']}:{app.config['RAG_PORT']}{app.config['RAG_ENDPOINT']}"
+    
+    # Prepare request payload
+    payload = {
+        'query': query,
+        'top_k': top_k,
+        'use_rag': use_rag,
+        'temperature': temperature
+    }
+    print("************************************\n hit rag_url " + rag_url)
+    print("************************************\n with payload " + str(payload))
+
+    try:
+        # Call RAG service
+        response = requests.post(rag_url, json=payload, timeout=120)
+        response.raise_for_status()
+        
+        # Return RAG service response
+        return jsonify(response.json())
+        
+    except requests.exceptions.ConnectionError:
+        return jsonify({
+            'error': 'Cannot connect to RAG service',
+            'details': f'Unable to reach {rag_url}. Make sure the RAG service is running.'
+        }), 503
+        
+    except requests.exceptions.Timeout:
+        return jsonify({
+            'error': 'RAG service timeout',
+            'details': 'The RAG service took too long to respond.'
+        }), 504
+        
+    except requests.exceptions.HTTPError as e:
+        return jsonify({
+            'error': 'RAG service error',
+            'details': str(e),
+            'status_code': response.status_code
+        }), response.status_code
+        
+    except Exception as e:
+        return jsonify({
+            'error': 'Unexpected error',
+            'details': str(e)
+        }), 500
+
+@app.route('/api/rag/config', methods=['GET'])
+def get_rag_config():
+    """Get RAG service configuration"""
+    return jsonify({
+        'rag_url': app.config['RAG_URL'],
+        'rag_port': app.config['RAG_PORT'],
+        'default_top_k': app.config['RAG_DEFAULT_TOP_K'],
+        'default_temperature': app.config['RAG_DEFAULT_TEMPERATURE']
+    })
+
 # Background processing
 def process_job(job_id):
     """Process a transcode job"""
@@ -307,16 +386,28 @@ def on_new_file(file_path):
             # Start processing
             threading.Thread(target=process_job, args=(job.id,), daemon=True).start()
 
-
 if __name__ == '__main__':
     print("Starting Video Transcoder...")
-
-    # Wrapped in app context - WORKS!
+    print("Initializing database...")
+    
+    # Initialize watcher if enabled (with proper app context)
     with app.app_context():
         try:
             watch_enabled = Settings.get_value('watch_enabled', 'false')
-            ...
+            if watch_enabled == 'true':
+                source_folder = Settings.get_value('source_folder')
+                if source_folder and os.path.exists(source_folder):
+                    print(f"Starting folder watcher for: {source_folder}")
+                    watcher = FolderWatcher(source_folder, on_new_file)
+                    watcher.start()
+                else:
+                    print("Folder watcher enabled but source folder not configured or doesn't exist")
         except Exception as e:
-            print(f"Warning: {e}")
-
+            print(f"Warning: Could not initialize folder watcher: {e}")
+    
+    print("Starting Flask server...")
+    print("Web interface available at: http://localhost:5000")
+    print("Press Ctrl+C to stop")
+    print("-" * 50)
+    
     app.run(host='0.0.0.0', port=5000, debug=True)

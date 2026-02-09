@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Query - Video Transcoder</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        .rag-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .query-section {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .query-input {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .query-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .params-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .param-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .param-group label {
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .param-group input,
+        .param-group select {
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        .checkbox-param {
+            flex-direction: row;
+            align-items: center;
+        }
+        
+        .checkbox-param input {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+        
+        .query-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .query-btn:hover:not(:disabled) {
+            background: var(--primary-dark);
+        }
+        
+        .query-btn:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
+        }
+        
+        .response-section {
+            background: var(--card-background);
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .response-content {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            white-space: pre-wrap;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        
+        .response-meta {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .nav-link {
+            display: inline-block;
+            color: var(--primary-color);
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="rag-container">
+        <header>
+            <a href="/" class="nav-link">← Back to Video Transcoder</a>
+            <h1>🤖 RAG Query Interface</h1>
+            <p style="color: var(--text-secondary); margin-top: 10px;">
+                Query the Retrieval Augmented Generation service
+            </p>
+        </header>
+
+        <main>
+            <!-- Query Input Section -->
+            <section class="query-section">
+                <h2>Query Input</h2>
+                
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label for="queryInput">Enter your query:</label>
+                    <textarea 
+                        id="queryInput" 
+                        class="query-input" 
+                        placeholder="e.g., Generate Yoga Class, Explain quantum computing, etc."
+                    ></textarea>
+                </div>
+                
+                <div class="params-grid">
+                    <div class="param-group">
+                        <label for="topK">Top K Results:</label>
+                        <input type="number" id="topK" min="1" max="10" value="3">
+                    </div>
+                    
+                    <div class="param-group">
+                        <label for="temperature">Temperature:</label>
+                        <input type="number" id="temperature" min="0" max="2" step="0.1" value="0.1">
+                    </div>
+                    
+                    <div class="param-group checkbox-param">
+                        <input type="checkbox" id="useRag" checked>
+                        <label for="useRag">Use RAG</label>
+                    </div>
+                </div>
+                
+                <button id="queryBtn" class="query-btn">
+                    <span id="btnText">Submit Query</span>
+                    <span id="btnSpinner" class="loading-spinner hidden"></span>
+                </button>
+            </section>
+
+            <!-- Response Section -->
+            <section id="responseSection" class="response-section hidden">
+                <h2>Response</h2>
+                
+                <div id="responseContent" class="response-content"></div>
+                
+                <div class="response-meta">
+                    <span><strong>Query:</strong> <span id="metaQuery"></span></span>
+                    <span id="metaSources"></span>
+                </div>
+                
+                <div id="errorMessage" class="error-message hidden"></div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        const queryInput = document.getElementById('queryInput');
+        const topKInput = document.getElementById('topK');
+        const temperatureInput = document.getElementById('temperature');
+        const useRagCheckbox = document.getElementById('useRag');
+        const queryBtn = document.getElementById('queryBtn');
+        const btnText = document.getElementById('btnText');
+        const btnSpinner = document.getElementById('btnSpinner');
+        const responseSection = document.getElementById('responseSection');
+        const responseContent = document.getElementById('responseContent');
+        const metaQuery = document.getElementById('metaQuery');
+        const metaSources = document.getElementById('metaSources');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // Submit query
+        queryBtn.addEventListener('click', async () => {
+            const query = queryInput.value.trim();
+            
+            if (!query) {
+                alert('Please enter a query');
+                return;
+            }
+            
+            // Show loading state
+            queryBtn.disabled = true;
+            btnText.classList.add('hidden');
+            btnSpinner.classList.remove('hidden');
+            responseSection.classList.add('hidden');
+            errorMessage.classList.add('hidden');
+            
+            // Prepare request
+            const payload = {
+                query: query,
+                top_k: parseInt(topKInput.value),
+                use_rag: useRagCheckbox.checked,
+                temperature: parseFloat(temperatureInput.value)
+            };
+            
+            try {
+                const response = await fetch('/api/rag/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(data.error || data.details || 'Unknown error');
+                }
+                
+                // Display response
+                responseContent.textContent = data.answer || 'No answer received';
+                metaQuery.textContent = data.query || query;
+                
+                if (data.sources && data.sources.length > 0) {
+                    metaSources.innerHTML = `<strong>Sources:</strong> ${data.sources.length} documents`;
+                } else {
+                    metaSources.innerHTML = '<strong>Sources:</strong> None';
+                }
+                
+                responseSection.classList.remove('hidden');
+                
+            } catch (error) {
+                errorMessage.textContent = `Error: ${error.message}`;
+                errorMessage.classList.remove('hidden');
+                responseSection.classList.remove('hidden');
+                responseContent.textContent = '';
+            } finally {
+                // Reset button state
+                queryBtn.disabled = false;
+                btnText.classList.remove('hidden');
+                btnSpinner.classList.add('hidden');
+            }
+        });
+        
+        // Allow Enter key to submit (Ctrl+Enter for newline)
+        queryInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey) {
+                e.preventDefault();
+                queryBtn.click();
+            }
+        });
+    </script>
+</body>
+</html>

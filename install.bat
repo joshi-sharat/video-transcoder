@@ -1,4 +1,5 @@
 @echo off
+setlocal enabledelayedexpansion
 REM Video Transcoder - Windows One-Click Installer
 
 title Video Transcoder Setup
@@ -22,7 +23,7 @@ echo.
 REM Check Python
 echo Checking Python installation...
 python --version >nul 2>&1
-if %errorlevel% neq 0 (
+if !errorlevel! neq 0 (
     color 0C
     echo.
     echo [ERROR] Python is NOT installed!
@@ -47,7 +48,7 @@ if exist "venv\" (
     echo Virtual environment already exists, skipping...
 ) else (
     python -m venv venv
-    if %errorlevel% neq 0 (
+    if !errorlevel! neq 0 (
         color 0C
         echo [ERROR] Failed to create virtual environment
         pause
@@ -73,7 +74,7 @@ REM Install dependencies
 echo Installing application dependencies...
 echo This may take a few minutes...
 pip install -r requirements.txt
-if %errorlevel% neq 0 (
+if !errorlevel! neq 0 (
     color 0C
     echo [ERROR] Failed to install dependencies
     pause
@@ -104,8 +105,8 @@ echo.
 
 REM Check FFmpeg
 echo Checking FFmpeg installation...
-ffmpeg -version >nul 2>&1
-if %errorlevel% neq 0 (
+where ffmpeg >nul 2>&1
+if !errorlevel! neq 0 (
     color 0E
     echo.
     echo ========================================
@@ -141,7 +142,6 @@ if %errorlevel% neq 0 (
     )
     color 0A
 ) else (
-    ffmpeg -version | findstr "ffmpeg version"
     echo [OK] FFmpeg is installed
 )
 echo.
@@ -174,7 +174,7 @@ echo.
 echo To start the application:
 echo.
 echo   1. Double-click: start.bat
-echo
+echo   
 echo   2. Or run in Command Prompt:
 echo      start.bat
 echo.
@@ -197,3 +197,5 @@ if /i "%launch%"=="y" (
     echo.
     pause
 )
+
+endlocal

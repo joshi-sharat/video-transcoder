@@ -112,7 +112,7 @@ try {
     Write-Host ""
     Write-Host "========================================"
     Write-Host ""
-
+    
     $continue = Read-Host "Continue without FFmpeg? (y/n)"
     if ($continue -ne "y") {
         Write-Host "Please install FFmpeg and run this script again."
