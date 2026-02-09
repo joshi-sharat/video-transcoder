@@ -35,7 +35,7 @@ class VideoTranscoder:
         video_codec = settings.get('video_codec', 'libx264')
         audio_codec = settings.get('audio_codec', 'aac')
         preset = settings.get('preset', 'medium')
-        crf = settings.get('crf', 23)
+        crf = settings.get('crf', 28)
 
         # Build FFmpeg command
         cmd = [
@@ -45,7 +45,7 @@ class VideoTranscoder:
             '-preset', preset,
             '-crf', str(crf),
             '-c:a', audio_codec,
-            '-b:a', '192k',
+            '-b:a', '128k',
             '-movflags', '+faststart',
             '-y',  # Overwrite output file
             '-progress', 'pipe:1',  # Output progress to stdout

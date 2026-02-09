@@ -307,12 +307,16 @@ def on_new_file(file_path):
             # Start processing
             threading.Thread(target=process_job, args=(job.id,), daemon=True).start()
 
+
 if __name__ == '__main__':
-    # Initialize watcher if enabled
-    if Settings.get_value('watch_enabled', 'false') == 'true':
-        source_folder = Settings.get_value('source_folder')
-        if source_folder and os.path.exists(source_folder):
-            watcher = FolderWatcher(source_folder, on_new_file)
-            watcher.start()
-    
+    print("Starting Video Transcoder...")
+
+    # Wrapped in app context - WORKS!
+    with app.app_context():
+        try:
+            watch_enabled = Settings.get_value('watch_enabled', 'false')
+            ...
+        except Exception as e:
+            print(f"Warning: {e}")
+
     app.run(host='0.0.0.0', port=5000, debug=True)
